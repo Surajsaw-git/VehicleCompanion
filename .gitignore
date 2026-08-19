@@ -23,9 +23,13 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment variables
+# Environment variables & credentials
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+DEMO_USERS.md
+seed-*.js
+test-*.js
+

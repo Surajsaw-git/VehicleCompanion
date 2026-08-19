@@ -94,7 +94,8 @@ export function AuthProvider({ children }) {
         return { success: true };
       } else {
         // Demo login matching email or role
-        const match = DEMO_PROFILES.find(p => p.email.toLowerCase() === email.toLowerCase() || p.role === intendedRole) || {
+        const match = DEMO_PROFILES.find(p => p.email.toLowerCase() === email.toLowerCase()) || 
+                      DEMO_PROFILES.find(p => p.role === intendedRole) || {
           id: `usr-${Date.now()}`,
           name: email.split('@')[0],
           email,

@@ -1,0 +1,287 @@
+/**
+ * Initial Demo & Seed Data for local fallback / presentation
+ */
+
+export const DEMO_PROFILES = [
+  {
+    id: 'owner-1',
+    name: 'Rahul Sharma',
+    email: 'rahul.owner@companion.com',
+    phone: '+91 98765 43210',
+    role: 'owner',
+  },
+  {
+    id: 'mechanic-1',
+    name: 'Vikram Singh (Master Mechanic)',
+    email: 'vikram.garage@companion.com',
+    phone: '+91 98123 45678',
+    role: 'mechanic',
+  },
+  {
+    id: 'insurance-1',
+    name: 'Ananya Verma (HDFC ERGO Officer)',
+    email: 'ananya.insurance@companion.com',
+    phone: '+91 99887 76655',
+    role: 'insurance',
+  },
+];
+
+export const DEMO_VEHICLES = [
+  {
+    id: 'veh-1',
+    owner_id: 'owner-1',
+    registration_number: 'JH01AB1234',
+    brand: 'Hyundai',
+    model: 'Creta SX (O)',
+    year: 2023,
+    fuel_type: 'Petrol',
+    mileage: 18450,
+    created_at: '2023-05-10T10:00:00Z',
+  },
+  {
+    id: 'veh-2',
+    owner_id: 'owner-1',
+    registration_number: 'MH12CD5678',
+    brand: 'Tata',
+    model: 'Nexon EV Empowered',
+    year: 2024,
+    fuel_type: 'Electric',
+    mileage: 9200,
+    created_at: '2024-01-15T10:00:00Z',
+  },
+  {
+    id: 'veh-3',
+    owner_id: 'owner-1',
+    registration_number: 'DL03EF9012',
+    brand: 'Mahindra',
+    model: 'XUV700 AX7',
+    year: 2022,
+    fuel_type: 'Diesel',
+    mileage: 34100,
+    created_at: '2022-08-20T10:00:00Z',
+  },
+];
+
+export const DEMO_SERVICES = [
+  {
+    id: 'srv-1',
+    vehicle_id: 'veh-1',
+    mechanic_id: 'mechanic-1',
+    service_date: '2026-06-10',
+    service_type: 'General Service',
+    description: 'Engine oil replacement, oil filter change, fluid top up and wheel alignment.',
+    cost: 4850,
+    status: 'Completed',
+    created_at: '2026-06-10T11:00:00Z',
+  },
+  {
+    id: 'srv-2',
+    vehicle_id: 'veh-1',
+    mechanic_id: 'mechanic-1',
+    service_date: '2026-08-15',
+    service_type: 'Brake Service',
+    description: 'Front brake pad replacement and brake disc resurfacing.',
+    cost: 3200,
+    status: 'Completed',
+    created_at: '2026-08-15T14:30:00Z',
+  },
+  {
+    id: 'srv-3',
+    vehicle_id: 'veh-2',
+    mechanic_id: 'mechanic-1',
+    service_date: '2026-08-18',
+    service_type: 'EV Battery Diagnostic & Service',
+    description: 'Full high-voltage system health check and coolant flush.',
+    cost: 2500,
+    status: 'In Progress',
+    created_at: '2026-08-18T09:00:00Z',
+  },
+];
+
+export const DEMO_INSURANCE = [
+  {
+    id: 'ins-1',
+    vehicle_id: 'veh-1',
+    company_name: 'HDFC ERGO General Insurance',
+    policy_number: 'POL-HYU-887410',
+    start_date: '2025-09-01',
+    expiry_date: '2026-09-01',
+    premium: 14500,
+    status: 'Active',
+  },
+  {
+    id: 'ins-2',
+    vehicle_id: 'veh-2',
+    company_name: 'ICICI Lombard',
+    policy_number: 'POL-TAT-994321',
+    start_date: '2025-08-25',
+    expiry_date: '2026-08-25',
+    premium: 18200,
+    status: 'Expiring Soon',
+  },
+  {
+    id: 'ins-3',
+    vehicle_id: 'veh-3',
+    company_name: 'Bajaj Allianz',
+    policy_number: 'POL-MAH-112344',
+    start_date: '2024-07-10',
+    expiry_date: '2025-07-10',
+    premium: 22000,
+    status: 'Expired',
+  },
+];
+
+export const DEMO_FUEL = [
+  {
+    id: 'fuel-1',
+    vehicle_id: 'veh-1',
+    date: '2026-05-04',
+    fuel_type: 'Petrol',
+    quantity: 35,
+    price_per_litre: 102,
+    total_cost: 3570,
+    odometer: 17200,
+  },
+  {
+    id: 'fuel-2',
+    vehicle_id: 'veh-1',
+    date: '2026-06-12',
+    fuel_type: 'Petrol',
+    quantity: 40,
+    price_per_litre: 102,
+    total_cost: 4080,
+    odometer: 17750,
+  },
+  {
+    id: 'fuel-3',
+    vehicle_id: 'veh-1',
+    date: '2026-07-08',
+    fuel_type: 'Petrol',
+    quantity: 38,
+    price_per_litre: 101.50,
+    total_cost: 3857,
+    odometer: 18100,
+  },
+  {
+    id: 'fuel-4',
+    vehicle_id: 'veh-1',
+    date: '2026-08-14',
+    fuel_type: 'Petrol',
+    quantity: 42,
+    price_per_litre: 101.20,
+    total_cost: 4250,
+    odometer: 18450,
+  },
+  {
+    id: 'fuel-5',
+    vehicle_id: 'veh-3',
+    date: '2026-08-10',
+    fuel_type: 'Diesel',
+    quantity: 50,
+    price_per_litre: 89.50,
+    total_cost: 4475,
+    odometer: 34100,
+  },
+];
+
+export const DEMO_MAINTENANCE = [
+  {
+    id: 'maint-1',
+    vehicle_id: 'veh-1',
+    maintenance_type: 'Engine Oil Change',
+    due_date: '2026-08-25', // Due soon (within 7 days of 2026-08-19)
+    current_status: 'Due Soon',
+    description: 'Synthetic 5W-30 engine oil replacement.',
+  },
+  {
+    id: 'maint-2',
+    vehicle_id: 'veh-1',
+    maintenance_type: 'Tyre Rotation & Balancing',
+    due_date: '2026-09-15',
+    current_status: 'Upcoming',
+    description: '4-wheel cross rotation and high-speed wheel balancing.',
+  },
+  {
+    id: 'maint-3',
+    vehicle_id: 'veh-3',
+    maintenance_type: 'Brake Inspection',
+    due_date: '2026-08-10', // Overdue
+    current_status: 'Overdue',
+    description: 'Brake pads, fluid lines, and rotor wear check.',
+  },
+  {
+    id: 'maint-4',
+    vehicle_id: 'veh-2',
+    maintenance_type: 'Battery Check',
+    due_date: '2026-07-01',
+    current_status: 'Completed',
+    description: '12V auxiliary battery health check.',
+  },
+];
+
+export const DEMO_GARAGES = [
+  {
+    id: 'g-1',
+    name: 'SpeedyAuto Care & Service',
+    address: 'MG Road, Sector 14, Gurugram',
+    latitude: 28.4595,
+    longitude: 77.0266,
+    phone: '+91 98765 43210',
+    services: ['General Service', 'Engine Repair', 'Brake Repair', 'Tyre Service'],
+    rating: 4.8,
+  },
+  {
+    id: 'g-2',
+    name: 'Apex Motor Workshop',
+    address: 'Koramangala 5th Block, Bengaluru',
+    latitude: 12.9352,
+    longitude: 77.6245,
+    phone: '+91 98123 45678',
+    services: ['Oil Change', 'Battery Check', 'Brake Repair', 'AC Repair'],
+    rating: 4.6,
+  },
+  {
+    id: 'g-3',
+    name: 'Metro Vehicle Hub',
+    address: 'Andheri East, Mumbai',
+    latitude: 19.1136,
+    longitude: 72.8697,
+    phone: '+91 99887 76655',
+    services: ['General Service', 'Accident Repair', 'Tyre Rotation', 'Washing'],
+    rating: 4.7,
+  },
+  {
+    id: 'g-4',
+    name: 'Classic Garage & Repairs',
+    address: 'Connaught Place, New Delhi',
+    latitude: 28.6315,
+    longitude: 77.2167,
+    phone: '+91 97654 32109',
+    services: ['Engine Diagnosis', 'Electrical Repair', 'Brake Repair'],
+    rating: 4.5,
+  },
+  {
+    id: 'g-5',
+    name: 'Royal Care Motors',
+    address: 'Banjara Hills, Hyderabad',
+    latitude: 17.4126,
+    longitude: 78.4312,
+    phone: '+91 91234 56789',
+    services: ['Full Inspection', 'Engine Tuning', 'Battery Replacement'],
+    rating: 4.9,
+  },
+];
+
+export const DEMO_EMERGENCY = [
+  {
+    id: 'emg-1',
+    vehicle_id: 'veh-1',
+    owner_id: 'owner-1',
+    issue: 'Vehicle Breakdown',
+    latitude: 28.4595,
+    longitude: 77.0266,
+    description: 'Engine stalled on highway near Toll Plaza.',
+    status: 'On the Way',
+    created_at: '2026-08-19T18:30:00Z',
+  },
+];

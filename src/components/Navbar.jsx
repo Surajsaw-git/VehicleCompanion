@@ -1,10 +1,16 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Car, Menu, Bell, User, LogOut, Shield, AlertTriangle } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Car, Menu, LogOut, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar({ onToggleSidebar, onOpenEmergency }) {
   const { profile, role, logout, switchRole } = useAuth();
+  const navigate = useNavigate();
+
+  const handleRoleSwitch = (r) => {
+    switchRole(r);
+    navigate(`/${r}/dashboard`);
+  };
 
   return (
     <header className="bg-white border-b border-slate-200/80 sticky top-0 z-30 shadow-xs">
@@ -42,7 +48,7 @@ export default function Navbar({ onToggleSidebar, onOpenEmergency }) {
               {['owner', 'mechanic', 'insurance'].map((r) => (
                 <button
                   key={r}
-                  onClick={() => switchRole(r)}
+                  onClick={() => handleRoleSwitch(r)}
                   className={`px-2.5 py-1 rounded-lg capitalize transition ${
                     role === r
                       ? 'bg-white text-brand-700 shadow-xs font-bold'

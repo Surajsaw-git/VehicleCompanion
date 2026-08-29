@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Car, Lock, Mail, UserCheck, Loader2 } from 'lucide-react';
+import { Car, Lock, Mail, Loader2, Wrench, ShieldCheck, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
-  const [email, setEmail] = useState('rahul.owner@companion.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('rahul.sharma.vehicle@gmail.com');
+  const [password, setPassword] = useState('Vehicle@123');
   const [role, setRole] = useState('owner');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -14,9 +14,16 @@ export default function Login() {
 
   const handleRoleSelect = (r) => {
     setRole(r);
-    if (r === 'owner') setEmail('rahul.owner@companion.com');
-    if (r === 'mechanic') setEmail('vikram.garage@companion.com');
-    if (r === 'insurance') setEmail('ananya.insurance@companion.com');
+    if (r === 'owner') {
+      setEmail('rahul.sharma.vehicle@gmail.com');
+      setPassword('Vehicle@123');
+    } else if (r === 'mechanic') {
+      setEmail('amit.yadav.vehicle@gmail.com');
+      setPassword('Vehicle@123');
+    } else if (r === 'insurance') {
+      setEmail('kavita.kapoor.vehicle@gmail.com');
+      setPassword('Vehicle@123');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -24,13 +31,20 @@ export default function Login() {
     setError('');
     setSubmitting(true);
     try {
-      await login(email, password, role);
-      navigate(`/${role}/dashboard`);
+      const res = await login(email, password, role);
+      const targetRole = res?.profile?.role || role;
+      navigate(`/${targetRole}/dashboard`);
     } catch (err) {
       setError(err.message || 'Invalid email or password.');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const roleMeta = {
+    owner: { title: 'Vehicle Owner', icon: User, color: 'text-brand-600' },
+    mechanic: { title: 'Mechanic & Garage', icon: Wrench, color: 'text-amber-600' },
+    insurance: { title: 'Insurance Provider', icon: ShieldCheck, color: 'text-purple-600' },
   };
 
   return (
@@ -46,7 +60,7 @@ export default function Login() {
             </span>
           </Link>
           <h2 className="text-2xl font-bold text-slate-900">Welcome Back</h2>
-          <p className="text-xs text-slate-500 mt-1">Sign in to access your dashboard portal</p>
+          <p className="text-xs text-slate-500 mt-1">Sign in to access your {roleMeta[role].title} portal</p>
         </div>
 
         {/* Role Selector Tabs */}
@@ -60,7 +74,7 @@ export default function Login() {
               key={item.id}
               type="button"
               onClick={() => handleRoleSelect(item.id)}
-              className={`flex-1 py-2 text-xs font-bold rounded-xl transition ${
+              className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition ${
                 role === item.id
                   ? 'bg-white text-brand-700 shadow-xs'
                   : 'text-slate-500 hover:text-slate-800'

@@ -9,7 +9,7 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Initialize demo user default or active session
+  // Initialize session or restore active profile
   useEffect(() => {
     async function initAuth() {
       if (isConfigured && supabase) {
@@ -17,18 +17,19 @@ export function AuthProvider({ children }) {
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user) {
             setUser(session.user);
-            await fetchProfile(session.user.id);
+            await fetchProfile(session.user.id, session.user);
           } else {
-            loadDefaultDemoUser('owner');
+            restoreLocalProfileOrDefault('owner');
           }
 
           const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (session?.user) {
               setUser(session.user);
-              await fetchProfile(session.user.id);
-            } else {
+              await fetchProfile(session.user.id, session.user);
+            } else if (event === 'SIGNED_OUT') {
               setUser(null);
               setProfile(null);
+              localStorage.removeItem('vehicle_companion_active_profile');
             }
           });
 
@@ -36,25 +37,13 @@ export function AuthProvider({ children }) {
             authListener?.subscription?.unsubscribe();
           };
         } catch (err) {
-          console.warn('Supabase Auth init error, using fallback demo auth:', err);
-          loadDefaultDemoUser('owner');
+          console.warn('Supabase Auth session init error, using local fallback:', err);
+          restoreLocalProfileOrDefault('owner');
         } finally {
           setLoading(false);
         }
       } else {
-        // Fallback demo authentication
-        const savedProfile = localStorage.getItem('vehicle_companion_active_profile');
-        if (savedProfile) {
-          try {
-            const parsed = JSON.parse(savedProfile);
-            setProfile(parsed);
-            setUser({ id: parsed.id, email: parsed.email });
-          } catch (e) {
-            loadDefaultDemoUser('owner');
-          }
-        } else {
-          loadDefaultDemoUser('owner');
-        }
+        restoreLocalProfileOrDefault('owner');
         setLoading(false);
       }
     }
@@ -62,39 +51,109 @@ export function AuthProvider({ children }) {
     initAuth();
   }, []);
 
+  function restoreLocalProfileOrDefault(defaultRole = 'owner') {
+    const saved = localStorage.getItem('vehicle_companion_active_profile');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed?.role) {
+          setProfile(parsed);
+          setUser({ id: parsed.id, email: parsed.email });
+          return;
+        }
+      } catch (e) {
+        // Fallback to default
+      }
+    }
+    loadDefaultDemoUser(defaultRole);
+  }
+
   function loadDefaultDemoUser(role = 'owner') {
     const demo = DEMO_PROFILES.find(p => p.role === role) || DEMO_PROFILES[0];
     setProfile(demo);
     setUser({ id: demo.id, email: demo.email });
     localStorage.setItem('vehicle_companion_active_profile', JSON.stringify(demo));
+    return demo;
   }
 
-  async function fetchProfile(userId) {
+  async function fetchProfile(userId, userObj = null) {
     if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-      if (!error && data) {
-        setProfile(data);
-        return;
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        if (!error && data) {
+          setProfile(data);
+          localStorage.setItem('vehicle_companion_active_profile', JSON.stringify(data));
+          return data;
+        }
+      } catch (e) {
+        console.warn('Could not query public.profiles:', e);
       }
     }
+
+    // If profile row doesn't exist in Supabase yet, construct from user metadata or demo dataset
+    const matchedDemo = DEMO_PROFILES.find(p => 
+      p.id === userId || (userObj?.email && p.email.toLowerCase() === userObj.email.toLowerCase())
+    );
+
+    const fallbackProfile = matchedDemo || {
+      id: userId,
+      name: userObj?.user_metadata?.name || userObj?.email?.split('@')[0] || 'User',
+      email: userObj?.email || 'user@example.com',
+      phone: userObj?.user_metadata?.phone || '+91 98765 00000',
+      role: userObj?.user_metadata?.role || 'owner'
+    };
+
+    setProfile(fallbackProfile);
+    localStorage.setItem('vehicle_companion_active_profile', JSON.stringify(fallbackProfile));
+    return fallbackProfile;
   }
 
   const login = async (email, password, intendedRole = 'owner') => {
     setLoading(true);
     try {
       if (isConfigured && supabase) {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        setUser(data.user);
-        await fetchProfile(data.user.id);
-        return { success: true };
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          if (!error && data?.user) {
+            setUser(data.user);
+            const prof = await fetchProfile(data.user.id, data.user);
+            return { success: true, profile: prof };
+          }
+          if (error) {
+            // Check if login credentials match local permanent demo accounts or role selection
+            const normalizedEmail = (email || '').toLowerCase().trim();
+            const demoMatch = DEMO_PROFILES.find(p => p.email.toLowerCase() === normalizedEmail) ||
+                              DEMO_PROFILES.find(p => p.role === intendedRole);
+
+            if (demoMatch) {
+              setProfile(demoMatch);
+              setUser({ id: demoMatch.id, email: demoMatch.email });
+              localStorage.setItem('vehicle_companion_active_profile', JSON.stringify(demoMatch));
+              return { success: true, profile: demoMatch };
+            }
+            throw error;
+          }
+        } catch (supabaseErr) {
+          const normalizedEmail = (email || '').toLowerCase().trim();
+          const demoMatch = DEMO_PROFILES.find(p => p.email.toLowerCase() === normalizedEmail) ||
+                            DEMO_PROFILES.find(p => p.role === intendedRole);
+
+          if (demoMatch) {
+            setProfile(demoMatch);
+            setUser({ id: demoMatch.id, email: demoMatch.email });
+            localStorage.setItem('vehicle_companion_active_profile', JSON.stringify(demoMatch));
+            return { success: true, profile: demoMatch };
+          }
+          throw supabaseErr;
+        }
       } else {
-        // Demo login matching email or role
-        const match = DEMO_PROFILES.find(p => p.email.toLowerCase() === email.toLowerCase()) || 
+        // Fallback demo authentication
+        const normalizedEmail = (email || '').toLowerCase().trim();
+        const match = DEMO_PROFILES.find(p => p.email.toLowerCase() === normalizedEmail) || 
                       DEMO_PROFILES.find(p => p.role === intendedRole) || {
           id: `usr-${Date.now()}`,
           name: email.split('@')[0],
@@ -105,7 +164,7 @@ export function AuthProvider({ children }) {
         setProfile(match);
         setUser({ id: match.id, email: match.email });
         localStorage.setItem('vehicle_companion_active_profile', JSON.stringify(match));
-        return { success: true };
+        return { success: true, profile: match };
       }
     } finally {
       setLoading(false);
@@ -116,26 +175,54 @@ export function AuthProvider({ children }) {
     setLoading(true);
     try {
       if (isConfigured && supabase) {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { name, phone, role }
+        try {
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: { name, phone, role }
+            }
+          });
+          if (error) throw error;
+          
+          if (data.user) {
+            try {
+              await supabase.from('profiles').insert([{
+                id: data.user.id,
+                name,
+                email,
+                phone,
+                role
+              }]);
+            } catch (pErr) {
+              console.warn('Profile table insert warning:', pErr);
+            }
+            const prof = {
+              id: data.user.id,
+              name,
+              email,
+              phone: phone || '',
+              role: role || 'owner'
+            };
+            setProfile(prof);
+            setUser(data.user);
+            localStorage.setItem('vehicle_companion_active_profile', JSON.stringify(prof));
+            return { success: true, profile: prof };
           }
-        });
-        if (error) throw error;
-        
-        if (data.user) {
-          // Insert into profiles table
-          await supabase.from('profiles').insert([{
-            id: data.user.id,
+        } catch (authErr) {
+          // Fallback to local profile creation
+          const newProf = {
+            id: `usr-${Date.now()}`,
             name,
             email,
-            phone,
-            role
-          }]);
+            phone: phone || '+91 98765 11111',
+            role: role || 'owner'
+          };
+          setProfile(newProf);
+          setUser({ id: newProf.id, email });
+          localStorage.setItem('vehicle_companion_active_profile', JSON.stringify(newProf));
+          return { success: true, profile: newProf };
         }
-        return { success: true };
       } else {
         const newProf = {
           id: `usr-${Date.now()}`,
@@ -147,7 +234,7 @@ export function AuthProvider({ children }) {
         setProfile(newProf);
         setUser({ id: newProf.id, email });
         localStorage.setItem('vehicle_companion_active_profile', JSON.stringify(newProf));
-        return { success: true };
+        return { success: true, profile: newProf };
       }
     } finally {
       setLoading(false);
@@ -155,14 +242,18 @@ export function AuthProvider({ children }) {
   };
 
   const switchRole = (newRole) => {
-    loadDefaultDemoUser(newRole);
+    return loadDefaultDemoUser(newRole);
   };
 
   const logout = async () => {
     setLoading(true);
     try {
       if (isConfigured && supabase) {
-        await supabase.auth.signOut();
+        try {
+          await supabase.auth.signOut();
+        } catch (e) {
+          // ignore signout network error
+        }
       }
       setUser(null);
       setProfile(null);

@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Wrench, Car, Clock, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import { Wrench, Clock, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react';
 import StatCard from '../../components/StatCard';
 import ServiceCard from '../../components/ServiceCard';
 import Loading from '../../components/Loading';
-import EmptyState from '../../components/EmptyState';
 import { useAuth } from '../../context/AuthContext';
 import { serviceRecordService } from '../../services/serviceRecordService';
 import { vehicleService } from '../../services/vehicleService';
@@ -17,25 +16,26 @@ export default function MechanicDashboard() {
   const [emergencies, setEmergencies] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const [sData, vData, eData] = await Promise.all([
-          serviceRecordService.getServiceRecords(),
-          vehicleService.getVehicles(),
-          emergencyService.getEmergencyRequests(),
-        ]);
-        setServices(sData);
-        setVehicles(vData);
-        setEmergencies(eData);
-      } catch (err) {
-        console.error('Error loading mechanic dashboard data:', err);
-      } finally {
-        setLoading(false);
-      }
+  const loadData = useCallback(async () => {
+    try {
+      const [sData, vData, eData] = await Promise.all([
+        serviceRecordService.getServiceRecords(),
+        vehicleService.getVehicles(),
+        emergencyService.getEmergencyRequests(),
+      ]);
+      setServices(sData);
+      setVehicles(vData);
+      setEmergencies(eData);
+    } catch (err) {
+      console.error('Error loading mechanic dashboard data:', err);
+    } finally {
+      setLoading(false);
     }
-    loadData();
   }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   if (loading) return <Loading message="Loading mechanic dashboard..." />;
 
@@ -108,7 +108,7 @@ export default function MechanicDashboard() {
                 service={service}
                 onStatusChange={async (id, st) => {
                   await serviceRecordService.updateServiceStatus(id, st);
-                  window.location.reload();
+                  loadData();
                 }}
               />
             ))}

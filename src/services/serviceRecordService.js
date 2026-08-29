@@ -19,10 +19,14 @@ function setLocalServices(services) {
 export const serviceRecordService = {
   async getServiceRecords(vehicleId = null) {
     if (isConfigured && supabase) {
-      let query = supabase.from('service_records').select('*').order('service_date', { ascending: false });
-      if (vehicleId) query = query.eq('vehicle_id', vehicleId);
-      const { data, error } = await query;
-      if (!error && data) return data;
+      try {
+        let query = supabase.from('service_records').select('*').order('service_date', { ascending: false });
+        if (vehicleId) query = query.eq('vehicle_id', vehicleId);
+        const { data, error } = await query;
+        if (!error && data) return data;
+      } catch (err) {
+        console.warn('Supabase service_records query warning:', err);
+      }
     }
     const all = getLocalServices();
     if (vehicleId) return all.filter(s => s.vehicle_id === vehicleId);
@@ -31,13 +35,16 @@ export const serviceRecordService = {
 
   async addServiceRecord(record) {
     if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('service_records')
-        .insert([record])
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('service_records')
+          .insert([record])
+          .select()
+          .single();
+        if (!error && data) return data;
+      } catch (err) {
+        console.warn('Supabase addServiceRecord warning:', err);
+      }
     }
     const all = getLocalServices();
     const newRecord = {
@@ -53,14 +60,17 @@ export const serviceRecordService = {
 
   async updateServiceStatus(id, status) {
     if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('service_records')
-        .update({ status })
-        .eq('id', id)
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('service_records')
+          .update({ status })
+          .eq('id', id)
+          .select()
+          .single();
+        if (!error && data) return data;
+      } catch (err) {
+        console.warn('Supabase updateServiceStatus warning:', err);
+      }
     }
     const all = getLocalServices();
     const updated = all.map(s => s.id === id ? { ...s, status } : s);

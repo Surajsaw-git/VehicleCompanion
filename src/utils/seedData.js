@@ -4,6 +4,7 @@
 
 export const DEMO_PROFILES = [
   // --- 10 VEHICLE OWNERS ---
+  { id: 'owner-test01', name: 'Rahul Sharma (Test Owner)', email: 'owner.test01@gmail.com', phone: '9876543210', role: 'owner' },
   { id: 'owner-1', name: 'Rahul Sharma', email: 'rahul.sharma.vehicle@gmail.com', phone: '9876543210', role: 'owner' },
   { id: 'owner-2', name: 'Priya Verma', email: 'priya.verma.vehicle@gmail.com', phone: '9876543211', role: 'owner' },
   { id: 'owner-3', name: 'Arjun Patel', email: 'arjun.patel.vehicle@gmail.com', phone: '9876543212', role: 'owner' },
@@ -16,6 +17,7 @@ export const DEMO_PROFILES = [
   { id: 'owner-10', name: 'Pooja Mishra', email: 'pooja.mishra.vehicle@gmail.com', phone: '9876543219', role: 'owner' },
 
   // --- 10 MECHANICS ---
+  { id: 'mech-test01', name: 'Amit Yadav (Mechanic Test01)', email: 'mechanic.test01@gmail.com', phone: '9812345670', role: 'mechanic' },
   { id: 'mech-1', name: 'Amit Yadav (Master Mechanic)', email: 'amit.yadav.vehicle@gmail.com', phone: '9812345670', role: 'mechanic' },
   { id: 'mech-2', name: 'Suresh Patil', email: 'suresh.patil.vehicle@gmail.com', phone: '9812345671', role: 'mechanic' },
   { id: 'mech-3', name: 'Manoj Kumar', email: 'manoj.kumar.vehicle@gmail.com', phone: '9812345672', role: 'mechanic' },
@@ -28,6 +30,7 @@ export const DEMO_PROFILES = [
   { id: 'mech-10', name: 'Sanjay Pawar', email: 'sanjay.pawar.vehicle@gmail.com', phone: '9812345679', role: 'mechanic' },
 
   // --- 10 INSURANCE OFFICERS ---
+  { id: 'ins-test01', name: 'Kavita Kapoor (Insurance Test01)', email: 'insurance.test01@gmail.com', phone: '9988776650', role: 'insurance' },
   { id: 'ins-off-1', name: 'Kavita Kapoor (HDFC ERGO)', email: 'kavita.kapoor.vehicle@gmail.com', phone: '9988776650', role: 'insurance' },
   { id: 'ins-off-2', name: 'Anjali Malhotra (ICICI Lombard)', email: 'anjali.malhotra.vehicle@gmail.com', phone: '9988776651', role: 'insurance' },
   { id: 'ins-off-3', name: 'Nikhil Bansal (Bajaj Allianz)', email: 'nikhil.bansal.vehicle@gmail.com', phone: '9988776652', role: 'insurance' },

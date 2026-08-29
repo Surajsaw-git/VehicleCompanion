@@ -19,25 +19,33 @@ function setLocalVehicles(vehicles) {
 export const vehicleService = {
   async getVehicles(ownerId) {
     if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('vehicles')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (!error && data) return data;
+      try {
+        const { data, error } = await supabase
+          .from('vehicles')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (!error && data) return data;
+      } catch (err) {
+        console.warn('Supabase getVehicles warning:', err);
+      }
     }
     const all = getLocalVehicles();
     if (!ownerId) return all;
-    return all.filter(v => v.owner_id === ownerId || true); // return user vehicles
+    return all.filter(v => v.owner_id === ownerId || true);
   },
 
   async getVehicleById(id) {
     if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('vehicles')
-        .select('*')
-        .eq('id', id)
-        .single();
-      if (!error && data) return data;
+      try {
+        const { data, error } = await supabase
+          .from('vehicles')
+          .select('*')
+          .eq('id', id)
+          .single();
+        if (!error && data) return data;
+      } catch (err) {
+        console.warn('Supabase getVehicleById warning:', err);
+      }
     }
     const all = getLocalVehicles();
     return all.find(v => v.id === id) || null;
@@ -45,13 +53,16 @@ export const vehicleService = {
 
   async addVehicle(vehicleData) {
     if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('vehicles')
-        .insert([vehicleData])
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('vehicles')
+          .insert([vehicleData])
+          .select()
+          .single();
+        if (!error && data) return data;
+      } catch (err) {
+        console.warn('Supabase addVehicle warning:', err);
+      }
     }
     const all = getLocalVehicles();
     const newVeh = {
@@ -66,14 +77,17 @@ export const vehicleService = {
 
   async updateVehicle(id, vehicleData) {
     if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('vehicles')
-        .update(vehicleData)
-        .eq('id', id)
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('vehicles')
+          .update(vehicleData)
+          .eq('id', id)
+          .select()
+          .single();
+        if (!error && data) return data;
+      } catch (err) {
+        console.warn('Supabase updateVehicle warning:', err);
+      }
     }
     const all = getLocalVehicles();
     const updated = all.map(v => v.id === id ? { ...v, ...vehicleData, updated_at: new Date().toISOString() } : v);
@@ -83,12 +97,15 @@ export const vehicleService = {
 
   async deleteVehicle(id) {
     if (isConfigured && supabase) {
-      const { error } = await supabase
-        .from('vehicles')
-        .delete()
-        .eq('id', id);
-      if (error) throw error;
-      return true;
+      try {
+        const { error } = await supabase
+          .from('vehicles')
+          .delete()
+          .eq('id', id);
+        if (!error) return true;
+      } catch (err) {
+        console.warn('Supabase deleteVehicle warning:', err);
+      }
     }
     const all = getLocalVehicles();
     const filtered = all.filter(v => v.id !== id);

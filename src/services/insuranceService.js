@@ -20,14 +20,18 @@ function setLocalInsurance(records) {
 export const insuranceService = {
   async getInsurancePolicies(vehicleId = null) {
     if (isConfigured && supabase) {
-      let query = supabase.from('insurance').select('*');
-      if (vehicleId) query = query.eq('vehicle_id', vehicleId);
-      const { data, error } = await query;
-      if (!error && data) {
-        return data.map(i => ({
-          ...i,
-          status: getInsuranceStatus(i.expiry_date).status
-        }));
+      try {
+        let query = supabase.from('insurance').select('*');
+        if (vehicleId) query = query.eq('vehicle_id', vehicleId);
+        const { data, error } = await query;
+        if (!error && data && data.length > 0) {
+          return data.map(i => ({
+            ...i,
+            status: getInsuranceStatus(i.expiry_date).status
+          }));
+        }
+      } catch (err) {
+        console.warn('Supabase getInsurancePolicies warning:', err);
       }
     }
     const all = getLocalInsurance();
@@ -43,13 +47,16 @@ export const insuranceService = {
     const payload = { ...policy, status: computedStatus };
 
     if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('insurance')
-        .insert([payload])
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('insurance')
+          .insert([payload])
+          .select()
+          .single();
+        if (!error && data) return data;
+      } catch (err) {
+        console.warn('Supabase addInsurancePolicy fallback:', err);
+      }
     }
     const all = getLocalInsurance();
     const newPolicy = {
@@ -64,14 +71,17 @@ export const insuranceService = {
 
   async updatePolicy(id, updates) {
     if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('insurance')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('insurance')
+          .update(updates)
+          .eq('id', id)
+          .select()
+          .single();
+        if (!error && data) return data;
+      } catch (err) {
+        console.warn('Supabase updatePolicy fallback:', err);
+      }
     }
     const all = getLocalInsurance();
     const updated = all.map(p => p.id === id ? { ...p, ...updates } : p);

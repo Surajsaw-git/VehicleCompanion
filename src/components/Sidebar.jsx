@@ -12,7 +12,8 @@ import {
   FileText, 
   UserCheck, 
   X,
-  User
+  User,
+  ShieldAlert
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -44,6 +45,28 @@ export default function Sidebar({ isOpen, onClose }) {
       { to: '/insurance/requests', label: 'Verification Requests', icon: UserCheck },
       { to: '/insurance/profile', label: 'Company Profile', icon: User },
     ],
+    admin: [
+      { heading: 'Owner & Vehicles' },
+      { to: '/owner/dashboard', label: 'Owner Overview', icon: LayoutDashboard },
+      { to: '/owner/vehicles', label: 'Vehicles Fleet', icon: Car },
+      { to: '/owner/services', label: 'Service Records', icon: Wrench },
+      { to: '/owner/insurance', label: 'Insurance Policies', icon: ShieldCheck },
+      { to: '/owner/fuel', label: 'Fuel Expenses', icon: Fuel },
+      { to: '/owner/maintenance', label: 'Maintenance Alerts', icon: CalendarClock },
+      { to: '/owner/emergency', label: 'Emergency Dispatch', icon: AlertTriangle },
+      { to: '/owner/garages', label: 'Nearby Garages', icon: MapPin },
+
+      { heading: 'Mechanic & Repairs' },
+      { to: '/mechanic/dashboard', label: 'Workshop Desk', icon: LayoutDashboard },
+      { to: '/mechanic/requests', label: 'Active Repairs', icon: Wrench },
+      { to: '/mechanic/vehicles', label: 'Serviced Cars', icon: Car },
+      { to: '/mechanic/services', label: 'Repair Invoices', icon: FileText },
+
+      { heading: 'Insurance Underwriting' },
+      { to: '/insurance/dashboard', label: 'Insurance Desk', icon: LayoutDashboard },
+      { to: '/insurance/policies', label: 'All Active Policies', icon: ShieldCheck },
+      { to: '/insurance/requests', label: 'Claims & Verifications', icon: UserCheck },
+    ]
   };
 
   const links = navLinksByRole[role] || navLinksByRole.owner;
@@ -73,11 +96,25 @@ export default function Sidebar({ isOpen, onClose }) {
           </div>
 
           <div className="mb-4">
-            <span className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-2">
-              {role.toUpperCase()} PORTAL
-            </span>
+            <div className="px-3 mb-2 flex items-center justify-between">
+              <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest block">
+                {role === 'admin' ? '👑 ADMIN CONTROL' : `${role.toUpperCase()} PORTAL`}
+              </span>
+            </div>
+
             <nav className="space-y-1">
-              {links.map((link) => {
+              {links.map((link, idx) => {
+                if (link.heading) {
+                  return (
+                    <div
+                      key={`heading-${idx}`}
+                      className="pt-3 pb-1 px-3 text-[10px] font-black uppercase tracking-wider text-slate-400 border-t border-slate-100 mt-2 first:mt-0 first:border-0"
+                    >
+                      {link.heading}
+                    </div>
+                  );
+                }
+
                 const Icon = link.icon;
                 return (
                   <NavLink
@@ -85,14 +122,14 @@ export default function Sidebar({ isOpen, onClose }) {
                     to={link.to}
                     onClick={() => onClose && onClose()}
                     className={({ isActive }) =>
-                      `flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
+                      `flex items-center space-x-3 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
                         isActive
                           ? 'bg-brand-50 text-brand-700 shadow-xs border border-brand-100/60 font-bold'
                           : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                       }`
                     }
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-4 h-4 shrink-0" />
                     <span>{link.label}</span>
                   </NavLink>
                 );
@@ -104,8 +141,19 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* Footer info box */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/50">
           <div className="p-3 bg-brand-50/80 border border-brand-100 rounded-xl">
-            <p className="text-[11px] font-bold text-brand-900">Vehicle Companion v1.0</p>
-            <p className="text-[10px] text-brand-700 mt-0.5">Live Production Ready MVP</p>
+            <p className="text-[11px] font-bold text-brand-900 flex items-center space-x-1">
+              {role === 'admin' ? (
+                <>
+                  <ShieldAlert className="w-3.5 h-3.5 text-indigo-600 inline" />
+                  <span>Admin Master Mode</span>
+                </>
+              ) : (
+                <span>Vehicle Companion v1.0</span>
+              )}
+            </p>
+            <p className="text-[10px] text-brand-700 mt-0.5">
+              {role === 'admin' ? 'Full Cross-Module Access' : 'Live Production Ready MVP'}
+            </p>
           </div>
         </div>
       </aside>

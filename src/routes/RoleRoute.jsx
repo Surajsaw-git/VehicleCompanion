@@ -7,9 +7,11 @@ export default function RoleRoute({ allowedRoles = [] }) {
   const { role, loading } = useAuth();
 
   if (loading) return <Loading message="Checking role permissions..." />;
-  if (!allowedRoles.includes(role)) {
-    return <Navigate to={`/${role}/dashboard`} replace />;
+  
+  // Super Admin has master access to ALL role-protected routes
+  if (role === 'admin' || allowedRoles.includes(role)) {
+    return <Outlet />;
   }
 
-  return <Outlet />;
+  return <Navigate to={`/${role}/dashboard`} replace />;
 }

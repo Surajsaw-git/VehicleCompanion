@@ -20,10 +20,14 @@ function setLocalFuel(fuel) {
 export const fuelService = {
   async getFuelExpenses(vehicleId = null) {
     if (isConfigured && supabase) {
-      let query = supabase.from('fuel_expenses').select('*').order('date', { ascending: false });
-      if (vehicleId) query = query.eq('vehicle_id', vehicleId);
-      const { data, error } = await query;
-      if (!error && data) return data;
+      try {
+        let query = supabase.from('fuel_expenses').select('*').order('date', { ascending: false });
+        if (vehicleId) query = query.eq('vehicle_id', vehicleId);
+        const { data, error } = await query;
+        if (!error && data && data.length > 0) return data;
+      } catch (err) {
+        console.warn('Supabase getFuelExpenses warning:', err);
+      }
     }
     const all = getLocalFuel();
     if (vehicleId) return all.filter(f => f.vehicle_id === vehicleId);
@@ -35,13 +39,16 @@ export const fuelService = {
     const payload = { ...entry, total_cost: totalCost };
 
     if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('fuel_expenses')
-        .insert([payload])
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('fuel_expenses')
+          .insert([payload])
+          .select()
+          .single();
+        if (!error && data) return data;
+      } catch (err) {
+        console.warn('Supabase addFuelExpense fallback:', err);
+      }
     }
     const all = getLocalFuel();
     const newEntry = {

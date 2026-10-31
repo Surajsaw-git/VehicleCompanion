@@ -15,10 +15,14 @@ function getLocalGarages() {
 export const garageService = {
   async getGarages() {
     if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('garages')
-        .select('*');
-      if (!error && data && data.length > 0) return data;
+      try {
+        const { data, error } = await supabase
+          .from('garages')
+          .select('*');
+        if (!error && data && data.length > 0) return data;
+      } catch (err) {
+        console.warn('Supabase getGarages warning:', err);
+      }
     }
     return getLocalGarages();
   }

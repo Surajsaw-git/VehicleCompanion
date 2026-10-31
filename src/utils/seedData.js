@@ -3,6 +3,9 @@
  */
 
 export const DEMO_PROFILES = [
+  // --- SUPER ADMIN ---
+  { id: 'admin-1', name: 'Mukesh Sahu (Super Admin)', email: 'mukeshsahu42781@gmail.com', phone: '9876543210', role: 'admin' },
+
   // --- 10 VEHICLE OWNERS ---
   { id: 'owner-test01', name: 'Rahul Sharma (Test Owner)', email: 'owner.test01@gmail.com', phone: '9876543210', role: 'owner' },
   { id: 'owner-1', name: 'Rahul Sharma', email: 'rahul.sharma.vehicle@gmail.com', phone: '9876543210', role: 'owner' },

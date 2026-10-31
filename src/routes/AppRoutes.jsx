@@ -51,8 +51,8 @@ export default function AppRoutes() {
       {/* Protected App Routes */}
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>
-          {/* Owner Portal */}
-          <Route element={<RoleRoute allowedRoles={['owner']} />}>
+          {/* Owner Portal (Accessible by Owner & Admin) */}
+          <Route element={<RoleRoute allowedRoles={['owner', 'admin']} />}>
             <Route path="/owner/dashboard" element={<OwnerDashboard />} />
             <Route path="/owner/vehicles" element={<OwnerVehicles />} />
             <Route path="/owner/vehicles/:id" element={<VehicleDetails />} />
@@ -65,8 +65,8 @@ export default function AppRoutes() {
             <Route path="/owner/profile" element={<OwnerProfile />} />
           </Route>
 
-          {/* Mechanic Portal */}
-          <Route element={<RoleRoute allowedRoles={['mechanic']} />}>
+          {/* Mechanic Portal (Accessible by Mechanic & Admin) */}
+          <Route element={<RoleRoute allowedRoles={['mechanic', 'admin']} />}>
             <Route path="/mechanic/dashboard" element={<MechanicDashboard />} />
             <Route path="/mechanic/requests" element={<MechanicRequests />} />
             <Route path="/mechanic/vehicles" element={<MechanicVehicles />} />
@@ -74,8 +74,8 @@ export default function AppRoutes() {
             <Route path="/mechanic/profile" element={<MechanicProfile />} />
           </Route>
 
-          {/* Insurance Portal */}
-          <Route element={<RoleRoute allowedRoles={['insurance']} />}>
+          {/* Insurance Portal (Accessible by Insurance & Admin) */}
+          <Route element={<RoleRoute allowedRoles={['insurance', 'admin']} />}>
             <Route path="/insurance/dashboard" element={<InsuranceDashboard />} />
             <Route path="/insurance/policies" element={<InsurancePolicies />} />
             <Route path="/insurance/requests" element={<InsuranceRequests />} />

@@ -104,7 +104,7 @@ export function AuthProvider({ children }) {
       name: userObj?.user_metadata?.name || userObj?.email?.split('@')[0] || 'User',
       email: userObj?.email || 'user@example.com',
       phone: userObj?.user_metadata?.phone || '+91 98765 00000',
-      role: userObj?.user_metadata?.role || 'owner'
+      role: userObj?.user_metadata?.role || (userObj?.email === 'mukeshsahu42781@gmail.com' ? 'admin' : 'owner')
     };
 
     setProfile(fallbackProfile);
@@ -115,6 +115,26 @@ export function AuthProvider({ children }) {
   const login = async (email, password, intendedRole = 'owner') => {
     setLoading(true);
     try {
+      const normalizedEmail = (email || '').toLowerCase().trim();
+
+      // Master Admin credential handler
+      if (normalizedEmail === 'mukeshsahu42781@gmail.com') {
+        if (password && password !== 'muk@123456') {
+          throw new Error('Incorrect password for Admin account.');
+        }
+        const adminProfile = DEMO_PROFILES.find(p => p.role === 'admin') || {
+          id: 'admin-1',
+          name: 'Mukesh Sahu (Super Admin)',
+          email: 'mukeshsahu42781@gmail.com',
+          phone: '9876543210',
+          role: 'admin'
+        };
+        setProfile(adminProfile);
+        setUser({ id: adminProfile.id, email: adminProfile.email });
+        localStorage.setItem('vehicle_companion_active_profile', JSON.stringify(adminProfile));
+        return { success: true, profile: adminProfile };
+      }
+
       if (isConfigured && supabase) {
         try {
           const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -125,7 +145,6 @@ export function AuthProvider({ children }) {
           }
           if (error) {
             // Check if login credentials match local permanent demo accounts or role selection
-            const normalizedEmail = (email || '').toLowerCase().trim();
             const demoMatch = DEMO_PROFILES.find(p => p.email.toLowerCase() === normalizedEmail) ||
                               DEMO_PROFILES.find(p => p.role === intendedRole);
 
@@ -138,7 +157,6 @@ export function AuthProvider({ children }) {
             throw error;
           }
         } catch (supabaseErr) {
-          const normalizedEmail = (email || '').toLowerCase().trim();
           const demoMatch = DEMO_PROFILES.find(p => p.email.toLowerCase() === normalizedEmail) ||
                             DEMO_PROFILES.find(p => p.role === intendedRole);
 
@@ -152,7 +170,6 @@ export function AuthProvider({ children }) {
         }
       } else {
         // Fallback demo authentication
-        const normalizedEmail = (email || '').toLowerCase().trim();
         const match = DEMO_PROFILES.find(p => p.email.toLowerCase() === normalizedEmail) || 
                       DEMO_PROFILES.find(p => p.role === intendedRole) || {
           id: `usr-${Date.now()}`,

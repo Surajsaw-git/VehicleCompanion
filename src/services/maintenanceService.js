@@ -20,14 +20,18 @@ function setLocalMaintenance(items) {
 export const maintenanceService = {
   async getMaintenanceRecords(vehicleId = null) {
     if (isConfigured && supabase) {
-      let query = supabase.from('maintenance').select('*').order('due_date', { ascending: true });
-      if (vehicleId) query = query.eq('vehicle_id', vehicleId);
-      const { data, error } = await query;
-      if (!error && data) {
-        return data.map(m => ({
-          ...m,
-          current_status: getMaintenanceStatus(m.due_date, m.current_status === 'Completed').status
-        }));
+      try {
+        let query = supabase.from('maintenance').select('*').order('due_date', { ascending: true });
+        if (vehicleId) query = query.eq('vehicle_id', vehicleId);
+        const { data, error } = await query;
+        if (!error && data && data.length > 0) {
+          return data.map(m => ({
+            ...m,
+            current_status: getMaintenanceStatus(m.due_date, m.current_status === 'Completed').status
+          }));
+        }
+      } catch (err) {
+        console.warn('Supabase getMaintenanceRecords warning:', err);
       }
     }
     const all = getLocalMaintenance();
@@ -43,13 +47,16 @@ export const maintenanceService = {
     const payload = { ...record, current_status: computedStatus };
 
     if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('maintenance')
-        .insert([payload])
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('maintenance')
+          .insert([payload])
+          .select()
+          .single();
+        if (!error && data) return data;
+      } catch (err) {
+        console.warn('Supabase addMaintenanceRecord fallback:', err);
+      }
     }
     const all = getLocalMaintenance();
     const newRecord = {
@@ -64,14 +71,17 @@ export const maintenanceService = {
 
   async updateMaintenanceStatus(id, newStatus) {
     if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('maintenance')
-        .update({ current_status: newStatus })
-        .eq('id', id)
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
+      try {
+        const { data, error } = await supabase
+          .from('maintenance')
+          .update({ current_status: newStatus })
+          .eq('id', id)
+          .select()
+          .single();
+        if (!error && data) return data;
+      } catch (err) {
+        console.warn('Supabase updateMaintenanceStatus fallback:', err);
+      }
     }
     const all = getLocalMaintenance();
     const updated = all.map(m => m.id === id ? { ...m, current_status: newStatus } : m);

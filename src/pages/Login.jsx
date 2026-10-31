@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Car, Lock, Mail, Loader2, Wrench, ShieldCheck, User } from 'lucide-react';
+import { Car, Lock, Mail, Loader2, Wrench, ShieldCheck, User, ShieldAlert } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
@@ -14,7 +14,10 @@ export default function Login() {
 
   const handleRoleSelect = (r) => {
     setRole(r);
-    if (r === 'owner') {
+    if (r === 'admin') {
+      setEmail('mukeshsahu42781@gmail.com');
+      setPassword('muk@123456');
+    } else if (r === 'owner') {
       setEmail('rahul.sharma.vehicle@gmail.com');
       setPassword('Vehicle@123');
     } else if (r === 'mechanic') {
@@ -33,7 +36,11 @@ export default function Login() {
     try {
       const res = await login(email, password, role);
       const targetRole = res?.profile?.role || role;
-      navigate(`/${targetRole}/dashboard`);
+      if (targetRole === 'admin') {
+        navigate('/owner/dashboard');
+      } else {
+        navigate(`/${targetRole}/dashboard`);
+      }
     } catch (err) {
       setError(err.message || 'Invalid email or password.');
     } finally {
@@ -42,6 +49,7 @@ export default function Login() {
   };
 
   const roleMeta = {
+    admin: { title: 'Master Admin', icon: ShieldAlert, color: 'text-indigo-600' },
     owner: { title: 'Vehicle Owner', icon: User, color: 'text-brand-600' },
     mechanic: { title: 'Mechanic & Garage', icon: Wrench, color: 'text-amber-600' },
     insurance: { title: 'Insurance Provider', icon: ShieldCheck, color: 'text-purple-600' },
@@ -60,12 +68,13 @@ export default function Login() {
             </span>
           </Link>
           <h2 className="text-2xl font-bold text-slate-900">Welcome Back</h2>
-          <p className="text-xs text-slate-500 mt-1">Sign in to access your {roleMeta[role].title} portal</p>
+          <p className="text-xs text-slate-500 mt-1">Sign in to access your {roleMeta[role]?.title || 'Portal'}</p>
         </div>
 
         {/* Role Selector Tabs */}
         <div className="bg-slate-100 p-1.5 rounded-2xl flex mb-6">
           {[
+            { id: 'admin', label: 'Admin 👑' },
             { id: 'owner', label: 'Owner' },
             { id: 'mechanic', label: 'Mechanic' },
             { id: 'insurance', label: 'Insurance' },
@@ -74,7 +83,7 @@ export default function Login() {
               key={item.id}
               type="button"
               onClick={() => handleRoleSelect(item.id)}
-              className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition ${
+              className={`flex-1 py-2 text-[11px] sm:text-xs font-bold rounded-xl transition ${
                 role === item.id
                   ? 'bg-white text-brand-700 shadow-xs'
                   : 'text-slate-500 hover:text-slate-800'
@@ -132,7 +141,9 @@ export default function Login() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition active:scale-95 flex items-center justify-center space-x-2"
+            className={`w-full py-3 text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition active:scale-95 flex items-center justify-center space-x-2 ${
+              role === 'admin' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-brand-600 hover:bg-brand-700'
+            }`}
           >
             {submitting ? (
               <>
@@ -140,12 +151,26 @@ export default function Login() {
                 <span>Signing in...</span>
               </>
             ) : (
-              <span>Sign In to {role.toUpperCase()} Portal</span>
+              <span>Sign In as {role.toUpperCase()}</span>
             )}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-xs text-slate-500">
+        {/* Admin Quick Login Badge */}
+        <div className="mt-4 p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-between text-[11px] text-indigo-900">
+          <div>
+            <span className="font-bold">👑 Master Admin:</span> mukeshsahu42781@gmail.com
+          </div>
+          <button
+            type="button"
+            onClick={() => handleRoleSelect('admin')}
+            className="text-xs font-bold text-indigo-600 hover:underline"
+          >
+            Use Credential
+          </button>
+        </div>
+
+        <div className="mt-5 text-center text-xs text-slate-500">
           Don't have an account?{' '}
           <Link to="/signup" className="text-brand-600 font-bold hover:underline">
             Create an account
